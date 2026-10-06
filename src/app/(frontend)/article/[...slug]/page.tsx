@@ -9,6 +9,7 @@ import MostRead from '@/components/sections/MostRead'
 import { RichText } from '@/components/RichText'
 import AdskeeperWidget from '@/components/ads/AdskeeperWidget'
 import { ReadingBar } from '@/components/ui/ReadingBar'
+import { ArticleTracker } from '@/components/article/ArticleTracker'
 
 interface PageProps {
   params: Promise<{ slug: string | string[] }>
@@ -140,6 +141,7 @@ export default async function ArticlePage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <ArticleTracker title={article.title} slug={articleSlug} />
       <ReadingBar />
 
       <article key={articleSlug} className="bbc-container article-page">

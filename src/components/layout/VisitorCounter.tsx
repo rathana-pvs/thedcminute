@@ -3,6 +3,43 @@
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 
+export function pingWhosAmungUs(title: string, url?: string) {
+  if (typeof window === 'undefined') return
+  try {
+    const siteKey = '2xx5m06lml'
+    const targetUrl = url || window.location.href
+    const referrer = document.referrer || ''
+
+    // Clean and limit title to 80 chars
+    const cleanTitle = (title || 'thedcminute')
+      .replace(/\s*—\s*thedcminute.*$/i, '')
+      .replace(/[\r\n\t]+/g, ' ')
+      .trim()
+      .slice(0, 80)
+      .replace(/(\?=)|(\/)/g, '')
+
+    const pageTitle = encodeURIComponent(cleanTitle || 'thedcminute')
+    const pageUrl = encodeURIComponent(targetUrl)
+    const pageRef = encodeURIComponent(referrer)
+    const randomId = Math.ceil(99999 * Math.random())
+
+    const pingScript = document.createElement('script')
+    pingScript.id = `_wau_ping_${Date.now()}`
+    pingScript.async = true
+    pingScript.src = `https://whos.amung.us/pingjs/?k=${siteKey}&t=${pageTitle}&c=d&x=${pageUrl}&y=${pageRef}&a=-1&v=27&r=${randomId}`
+
+    // Cleanup previous ping scripts to prevent memory leaks in DOM
+    const oldPings = document.querySelectorAll('script[id^="_wau_ping_"]')
+    oldPings.forEach((el) => {
+      if (el.parentNode) el.parentNode.removeChild(el)
+    })
+
+    document.head.appendChild(pingScript)
+  } catch (err) {
+    console.error('Failed to ping whos.amung.us:', err)
+  }
+}
+
 export function VisitorCounter() {
   const pathname = usePathname()
 
@@ -36,27 +73,21 @@ export function VisitorCounter() {
       localStorage.removeItem('_waucount')
     } catch (e) {}
 
-    // 5. Send ping to whos.amung.us with accurate article headline and URL after render
-    const timeoutId = setTimeout(() => {
-      // Prioritize the actual article <h1> headline, then document.title
-      const h1Text = document.querySelector('h1')?.textContent?.trim()
-      const rawTitle = h1Text || document.title || 'thedcminute'
-      const cleanTitle = rawTitle.replace(/\s*—\s*thedcminute.*$/i, '').trim()
-      
-      const pageTitle = encodeURIComponent(cleanTitle.substr(0, 80).replace(/(\?=)|(\/)/g, ''))
-      const pageUrl = encodeURIComponent(window.location.href)
-      const referrer = encodeURIComponent(document.referrer || '')
-      const randomId = Math.ceil(99999 * Math.random())
+    // On article pages, ArticleTracker handles tracking with the exact article title.
+    // Here we handle non-article routes (homepage, categories, static pages)
+    if (pathname && !pathname.startsWith('/article/')) {
+      const timer = setTimeout(() => {
+        let title = document.title || 'thedcminute'
+        if (pathname === '/') {
+          title = 'Homepage'
+        } else {
+          const h1Text = document.querySelector('h1')?.textContent?.trim()
+          if (h1Text) title = h1Text
+        }
+        pingWhosAmungUs(title)
+      }, 200)
 
-      const pingScript = document.createElement('script')
-      pingScript.id = `_wau_ping_${Date.now()}`
-      pingScript.async = true
-      pingScript.src = `https://whos.amung.us/pingjs/?k=2xx5m06lml&t=${pageTitle}&c=d&x=${pageUrl}&y=${referrer}&a=-1&v=27&r=${randomId}`
-      document.head.appendChild(pingScript)
-    }, 250)
-
-    return () => {
-      clearTimeout(timeoutId)
+      return () => clearTimeout(timer)
     }
   }, [pathname])
 
@@ -86,4 +117,5 @@ declare global {
     _wau?: any[]
   }
 }
+
 

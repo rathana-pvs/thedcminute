@@ -142,7 +142,7 @@ export default async function ArticlePage({ params }: PageProps) {
       />
       <ReadingBar />
 
-      <article className="bbc-container article-page">
+      <article key={articleSlug} className="bbc-container article-page">
         <header className="article-header">
           <h1 className="article-title">{article.title}</h1>
 
@@ -203,7 +203,7 @@ export default async function ArticlePage({ params }: PageProps) {
             {/* Bottom Feed Native Ad Widget — inside article content column, no border */}
             {widgetFeed && (
               <div className="article-bottom-feed-wrapper mt-6 mb-8">
-                <AdskeeperWidget widgetId={widgetFeed} />
+                <AdskeeperWidget widgetId={widgetFeed} adType="feed" />
               </div>
             )}
           </div>

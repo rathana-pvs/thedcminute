@@ -90,7 +90,7 @@ export const RichText = ({
         {serializeLexical(nodes, 'full')}
         {primaryWidgetId && (
           <div className="my-6 w-full flex justify-center items-center">
-            <AdskeeperWidget widgetId={primaryWidgetId} className="!my-0" />
+            <AdskeeperWidget widgetId={primaryWidgetId} adType="in-article-1" className="!my-0" />
           </div>
         )}
       </div>
@@ -108,7 +108,7 @@ export const RichText = ({
       {/* Ad after Paragraph 1 */}
       {primaryWidgetId && (
         <div className="my-6 w-full flex justify-center items-center">
-          <AdskeeperWidget widgetId={primaryWidgetId} className="!my-0" />
+          <AdskeeperWidget widgetId={primaryWidgetId} adType="in-article-1" className="!my-0" />
         </div>
       )}
 
@@ -143,7 +143,7 @@ export const RichText = ({
 
           {secondaryWidgetId && (
             <div className="my-6 w-full flex justify-center items-center">
-              <AdskeeperWidget widgetId={secondaryWidgetId} className="!my-0" />
+              <AdskeeperWidget widgetId={secondaryWidgetId} adType="in-article-2" className="!my-0" />
             </div>
           )}
         </div>

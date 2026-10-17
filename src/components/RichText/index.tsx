@@ -69,18 +69,16 @@ export const RichText = ({
   const secondaryWidgetId =
     adWidgetId2 || secondAdWidgetId || process.env.NEXT_PUBLIC_ADS_KEEPER_WIDGET_IN_ARTICLE_2 || ''
 
-  // Locate the end of Paragraph 1 and Paragraph 2
+  // Locate the end of Paragraph 1. Only the first paragraph is visible before
+  // the Continue Reading gate; paragraph 2 onward is revealed after expansion.
   let paragraphCount = 0
   let p1End = nodes.length
-  let p2End = nodes.length
 
   for (let i = 0; i < nodes.length; i++) {
     if (nodes[i].type === 'paragraph') {
       paragraphCount++
-      if (paragraphCount === 1) p1End = i + 1
-      if (paragraphCount === 2) {
-        p2End = i + 1
-        break
+      if (paragraphCount === 1) {
+        p1End = i + 1
       }
     }
   }
@@ -89,43 +87,33 @@ export const RichText = ({
   if (paragraphCount <= 1 || nodes.length <= 1) {
     return (
       <div className={`rich-text ${className || ''}`}>
-        {serializeLexical(nodes, 'full')}
         {primaryWidgetId && (
           <div className="my-6 w-full flex justify-center items-center">
             <AdskeeperWidget widgetId={primaryWidgetId} adType="in-article-1" className="!my-0" />
           </div>
         )}
+        {serializeLexical(nodes, 'full')}
       </div>
     )
   }
 
   const topNodes = nodes.slice(0, p1End) // Paragraph 1
-  const midNodes = nodes.slice(p1End, p2End) // Paragraph 2 (visible)
-  const remainingNodes = nodes.slice(p2End) // Paragraph 3, 4... (behind the gate)
+  const remainingNodes = nodes.slice(p1End) // Paragraph 2 onward (behind the gate)
 
   return (
     <div className={`rich-text ${className || ''}`}>
-      {/* Paragraph 1 */}
-      {serializeLexical(topNodes, 'top')}
-
-      {/* Ad after Paragraph 1 */}
+      {/* Ad before Paragraph 1 */}
       {primaryWidgetId && (
         <div className="my-6 w-full flex justify-center items-center">
           <AdskeeperWidget widgetId={primaryWidgetId} adType="in-article-1" className="!my-0" />
         </div>
       )}
 
-      {/* Paragraph 2 — fully visible */}
-      {serializeLexical(midNodes, 'mid')}
+      {/* Paragraph 1 — visible before the gate */}
+      {serializeLexical(topNodes, 'top')}
 
       {remainingNodes.length === 0 ? null : !isExpanded ? (
         <div className="continue-reading-gate">
-          {/* Paragraph 3 with bottom half blurred */}
-          <div className="continue-reading-fade">
-            {serializeLexical(remainingNodes.slice(0, 1), 'teaser')}
-            <div className="continue-reading-fade-overlay" />
-          </div>
-
           {/* Continue Reading Button */}
           <div className="continue-reading-btn-row">
             <button
